@@ -1,0 +1,50 @@
+name: Refresh map from Notion
+
+# Reads the Country of HQ database, regenerates index.html, and pushes if the
+# territories changed. Pages redeploys on push, and the Notion embed points at
+# the Pages URL, so the map in Notion updates with nobody touching anything.
+#
+# If the build's self-audit fails - a truncated read, a country that lost its AE,
+# an unknown AE group - the job fails instead of publishing a broken map, and
+# GitHub emails whoever owns the repo. Silence means it is working.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"      # Mondays 06:00 UTC
+  workflow_dispatch:          # or run it by hand from the Actions tab
+
+concurrency:
+  group: refresh-map
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Regenerate from Notion
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: python3 build.py --source notion
+
+      - name: Commit if the territories changed
+        run: |
+          if [ -z "$(git status --porcelain index.html ae-territories.csv assignments.json)" ]; then
+            echo "No territory changes."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html ae-territories.csv assignments.json
+          git commit -m "Refresh territories from Notion ($(date -u +%Y-%m-%d))"
+          git push
+          echo "### Map updated" >> "$GITHUB_STEP_SUMMARY"
+          git show --stat --oneline HEAD >> "$GITHUB_STEP_SUMMARY"

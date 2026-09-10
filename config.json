@@ -1,0 +1,101 @@
+{
+  "_comment": "Colours and labels for the AE territory map. Edit this, not build.py.",
+  "notion": {
+    "database_id": "c4601d0be0058270915881ddac4360f1",
+    "ae_property": "AE 2026",
+    "region_property": "Region",
+    "iso2_property": "Alpha-2 Code",
+    "country_property": "Country"
+  },
+  "_groups_comment": "Key = the AE names on a country, sorted, joined with ' & '. A country whose AE set matches a key gets that colour. 'label' overrides how the group is named in the legend (used for pools where the individuals don't split the region).",
+  "groups": {
+    "Coen Kooyman & Oliver DiRisi": {
+      "colour": "#4B3F72",
+      "code": "U"
+    },
+    "Kars Veldhoen": {
+      "colour": "#E0972B",
+      "code": "K"
+    },
+    "Xenia Gangl": {
+      "colour": "#2E8B57",
+      "code": "X"
+    },
+    "Yonno Paalhaar": {
+      "colour": "#86C8E8",
+      "code": "Y"
+    },
+    "Clément Fradet": {
+      "colour": "#C7548C",
+      "code": "C"
+    },
+    "Coen Kooyman": {
+      "colour": "#2E9E96",
+      "code": "A"
+    },
+    "Drew Samson & Michael Fotinatos & Nick Niemec & Randy Skipper": {
+      "colour": "#1F6FB2",
+      "code": "M",
+      "label": "AMER pool",
+      "pool": true
+    }
+  },
+  "_fallback_comment": "Colours handed out to any AE group that appears in Notion but is not listed above, so a new AE never breaks the build. The run warns loudly when one is used - add a proper entry here when that happens.",
+  "fallback_colours": [
+    "#7C6AA8",
+    "#C4703A",
+    "#4E9A5B",
+    "#5FA8C8",
+    "#B05A80",
+    "#3F8F88",
+    "#3D6E9E"
+  ],
+  "_legend_comment": "Legend rows are people, not colours: an AE who owns two groups (Coen owns UK&I jointly and APAC alone) gets ONE row carrying both, so clicking it isolates everything they own. Order controls display order; anyone not listed is appended alphabetically.",
+  "legend_order": [
+    "Coen Kooyman",
+    "Oliver DiRisi",
+    "Kars Veldhoen",
+    "Xenia Gangl",
+    "Yonno Paalhaar",
+    "Clément Fradet",
+    "AMER pool"
+  ],
+  "_shared_suffix_comment": "Appended to the region text of a person whose only groups are shared with someone else.",
+  "shared_suffix": " (shared)",
+  "_expectations_comment": "The build fails if reality drifts from these, so silent data loss is impossible. Update them deliberately when the database legitimately changes.",
+  "expectations": {
+    "min_countries_in_notion": 240,
+    "unassigned_paths_allowed": [
+      "N. Cyprus",
+      "Siachen Glacier",
+      "Somaliland"
+    ],
+    "_not_rendered_comment": "In the database but with no polygon at this map scale. Informational; the build lists any additions.",
+    "known_not_rendered": [
+      "AQ",
+      "BQ",
+      "BV",
+      "CC",
+      "GF",
+      "GI",
+      "GP",
+      "MQ",
+      "RE",
+      "SJ",
+      "TK",
+      "TV",
+      "UM",
+      "YT"
+    ]
+  },
+  "_iso_fixes_comment": "The database's Alpha-2 Code column has a few entries that are not valid ISO 3166-1 alpha-2, and three rows have no code at all. These are corrected on read so the join stays a pure code lookup. Fix them in Notion and these entries become harmless no-ops.",
+  "iso2_fixes": {
+    "KV": "KP"
+  },
+  "iso2_by_country_name": {
+    "Kosovo": "XK",
+    "Caribbean Netherlands": "BQ"
+  },
+  "unassigned_colour": "#d8dce1",
+  "_unassigned_comment": "Fill for a country with no AE in the database (disputed territories)."
+}
