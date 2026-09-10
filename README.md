@@ -5,29 +5,15 @@ Interactive world map showing which Account Executive owns each country, based o
 
 Hover a country for its AE and region. Click an AE in the legend to isolate their patch.
 
-## Publishing this (GitHub Pages)
+**Live:** https://rarelyraul.github.io/ae-territory-map/
 
-1. Create a new **public** repo — suggested name: `ae-territory-map`.
-2. Upload `index.html` to the root of the repo (drag and drop into the web UI is fine).
-3. Go to **Settings → Pages**.
-4. Under *Build and deployment*, set **Source** = `Deploy from a branch`,
-   **Branch** = `main`, folder = `/ (root)`. Save.
-5. Wait ~1 minute. The site goes live at:
-
-       https://<your-github-username>.github.io/ae-territory-map/
-
-The repo must be public for Pages to work on a free GitHub plan.
-
-## Embedding in Notion
-
-On the BDR + AE Regionalization page, inside a toggle:
-
-    /embed  →  paste the github.io URL above
+Served by GitHub Pages from the root of `main`. Push a new `index.html` and the live map
+updates about a minute later, at the same URL.
 
 ## Maintenance
 
 The country-to-AE assignments are **baked into `index.html`** — it does not read live
-from Notion. When territories change, the file needs regenerating and re-uploading.
+from Notion. When territories change, the file needs regenerating and pushing.
 
 ## Technical notes
 
