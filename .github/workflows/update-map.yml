@@ -1,12 +1,17 @@
 name: Refresh map from Notion
 
 # Reads the Country of HQ database, regenerates index.html, and pushes if the
-# territories changed. Pages redeploys on push, and the Notion embed points at
-# the Pages URL, so the map in Notion updates with nobody touching anything.
+# territories changed. Pages redeploys on push and the Notion embed points at
+# Pages, so the map on the wiki page updates with nobody touching anything.
 #
-# If the build's self-audit fails - a truncated read, a country that lost its AE,
-# an unknown AE group - the job fails instead of publishing a broken map, and
-# GitHub emails whoever owns the repo. Silence means it is working.
+# DORMANT UNTIL A TOKEN EXISTS. With no NOTION_TOKEN secret the job logs a
+# notice and stops - it does not fail, so it will not email anyone every week.
+# Adding the secret is the only thing needed to switch it on; no edit here.
+# Setup is in HANDOFF.md section 2.
+#
+# Once live: if the build's self-audit trips - a truncated read, a country that
+# lost its AE, an unknown AE group - the job fails instead of publishing a
+# broken map, and GitHub emails the repo owner. Silence means it is working.
 
 on:
   schedule:
@@ -24,21 +29,43 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
+      - name: Is the Notion token configured?
+        id: gate
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: |
+          if [ -z "$NOTION_TOKEN" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No NOTION_TOKEN secret, so there is nothing to read. Add it under Settings -> Secrets and variables -> Actions to start the weekly refresh. See HANDOFF.md section 2."
+            {
+              echo "### Skipped"
+              echo "No \`NOTION_TOKEN\` secret is set, so the map was not refreshed."
+              echo "Add the secret to activate this workflow - no change to the YAML is needed."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.gate.outputs.ready == 'true'
 
       - uses: actions/setup-python@v5
+        if: steps.gate.outputs.ready == 'true'
         with:
           python-version: "3.12"
 
       - name: Regenerate from Notion
+        if: steps.gate.outputs.ready == 'true'
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
         run: python3 build.py --source notion
 
       - name: Commit if the territories changed
+        if: steps.gate.outputs.ready == 'true'
         run: |
           if [ -z "$(git status --porcelain index.html ae-territories.csv assignments.json)" ]; then
             echo "No territory changes."
+            echo "### No changes" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           git config user.name  "github-actions[bot]"
@@ -46,5 +73,7 @@ jobs:
           git add index.html ae-territories.csv assignments.json
           git commit -m "Refresh territories from Notion ($(date -u +%Y-%m-%d))"
           git push
-          echo "### Map updated" >> "$GITHUB_STEP_SUMMARY"
-          git show --stat --oneline HEAD >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### Map updated"
+            git show --stat --oneline HEAD
+          } >> "$GITHUB_STEP_SUMMARY"
